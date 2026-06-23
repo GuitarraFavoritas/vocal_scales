@@ -106,15 +106,25 @@ exercise = st.selectbox(
     on_change=sync_selection
 )
 
-# --- NUEVO GESTOR CRUD COMPLETO ---
+# --- GESTOR CRUD COMPLETO ---
 with st.popover("🛠️ Gestor de Ejercicios (Crear / Editar / Borrar)"):
     tab_edit, tab_new, tab_del = st.tabs(["✏️ Editar actual", "➕ Crear nuevo", "🗑️ Borrar"])
 
-    # 1. MODIFICAR EXISTENTE
+    # 1. MODIFICAR EXISTENTE (Claves dinámicas f"_{exercise}")
     with tab_edit:
         st.caption(f"Modificando: **{exercise}**")
-        edit_name = st.text_input("Nombre del ejercicio:", value=exercise, key="in_ed_name")
-        edit_pat = st.text_area("Patrón musical (grados y duraciones):", value=patterns[exercise], height=100, key="in_ed_pat")
+        
+        edit_name = st.text_input(
+            "Nombre del ejercicio:", 
+            value=exercise, 
+            key=f"ed_nm_{exercise}"  # <--- CLAVE DINÁMICA
+        )
+        edit_pat = st.text_area(
+            "Patrón musical (grados y duraciones):", 
+            value=patterns[exercise], 
+            height=100, 
+            key=f"ed_pt_{exercise}"  # <--- CLAVE DINÁMICA
+        )
         
         if st.button("Guardar cambios", key="btn_save_ed", type="primary", use_container_width=True):
             if not edit_name.strip() or not edit_pat.strip():
@@ -186,11 +196,10 @@ with st.popover("Otras configuraciones"):
 # ==============================
 if st.button("Generar MIDI"):
     
-    # PARACAÍDAS DE SEGURIDAD: Verifica si escribiste bien el patrón musical
     try:
         pattern_notes = parse_pattern(patterns[exercise])
     except Exception:
-        st.error("❌ Hay un error de sintaxis en el patrón musical de este ejercicio (ej. pusiste una letra donde va un número). Entra al 'Gestor de Ejercicios' y corrígelo.")
+        st.error("❌ Hay un error de sintaxis en el patrón musical de este ejercicio. Entra al 'Gestor de Ejercicios' y corrígelo.")
         st.stop()
 
     mf = MIDIFile(2) 
